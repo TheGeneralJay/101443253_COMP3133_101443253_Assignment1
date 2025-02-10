@@ -53,6 +53,8 @@ module.exports = `#graphql
   type Query {
     login(username: String!, password: String!): User!
     getEmployees: [Employee]
+    getEmployeeById(ID: ID!): Employee!
+    getEmployeeByDesc(designationOrDepartment: String!): [Employee]
   }
 
   type Mutation {

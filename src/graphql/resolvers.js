@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Employee = require("../models/Employee");
 const { isValidGender } = require("../utils/isValidGender");
+const mongoose = require("mongoose");
 
 module.exports = {
   Query: {
@@ -17,6 +18,25 @@ module.exports = {
 
     async getEmployees(_) {
       return await Employee.find({});
+    },
+
+    async getEmployeeById(_, id) {
+      const employee = await Employee.findById(id.ID);
+
+      return employee;
+    },
+
+    async getEmployeeByDesc(_, searchWord) {
+      const search = searchWord.designationOrDepartment;
+
+      const employees = await Employee.find({
+        $or: [
+          { designation: { $regex: search, $options: "i" } },
+          { department: { $regex: search, $options: "i" } },
+        ],
+      });
+
+      return employees;
     },
   },
   Mutation: {
