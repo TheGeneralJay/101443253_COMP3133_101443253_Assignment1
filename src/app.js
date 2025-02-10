@@ -2,8 +2,12 @@ const { ApolloServer } = require("@apollo/server");
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const db = require("./database/db.js");
 const { expressMiddleware } = require("@apollo/server/express4");
-const PORT = 3000;
+const PORT = 4000;
+
+// DB Connection.
+db.mongoose.connect(db.URI);
 
 const typeDefs = require("./graphql/typeDefs");
 const resolvers = require("./graphql/resolvers");
@@ -16,16 +20,11 @@ const server = new ApolloServer({
 
 const app = express();
 app.use(express.json());
-
-const loginPath = "/login";
-const loginRoutes = require("./routes/loginRoutes.js");
-
-app.use(loginPath, loginRoutes);
+app.use(bodyParser.json());
 
 app.listen(PORT, async () => {
   await server.start();
-  app.use(expressMiddleware(server));
-  app.use(bodyParser.json());
+  app.use("/graphql", expressMiddleware(server));
   app.use("*", cors());
 
   console.log(`http://localhost:${PORT}`);

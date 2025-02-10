@@ -3,7 +3,7 @@ const Employee = require("../models/Employee");
 
 module.exports = {
   Query: {
-    async login(username, password) {
+    async login(_, { username, password }) {
       const user = await User.findOne({ username: username });
 
       // If the password does not match, throw error.
@@ -30,13 +30,7 @@ module.exports = {
 
       const res = await createdUser.save();
 
-      //   console.log("res._doc:");
-      //   console.log(res._doc);
-
-      return {
-        id: res.id,
-        ...res._doc,
-      };
+      return res;
     },
 
     async createEmployee(
