@@ -3,8 +3,15 @@ const Employee = require("../models/Employee");
 
 module.exports = {
   Query: {
-    async login(_, { ID }) {
-      return await User.findById(ID);
+    async login(username, password) {
+      const user = await User.findOne({ username: username });
+
+      // If the password does not match, throw error.
+      if (password != user.password) {
+        throw new Error();
+      }
+
+      return user;
     },
 
     async getEmployees(_) {
