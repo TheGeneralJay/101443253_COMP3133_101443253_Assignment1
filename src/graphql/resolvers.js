@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Employee = require("../models/Employee");
+const { isValidGender } = require("../utils/isValidGender");
 
 module.exports = {
   Query: {
@@ -49,26 +50,31 @@ module.exports = {
         },
       }
     ) {
-      const createdEmployee = new Employee({
-        first_name: first_name,
-        last_name: last_name,
-        email: email,
-        gender: gender,
-        designation: designation,
-        salary: salary,
-        date_of_joining: new Date(date_of_joining).toISOString(),
-        department: department,
-        employee_photo: employee_photo,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
+      // If the gender option is not one of the pre-defined values, do not continue.
+      try {
+        if (!isValidGender(gender)) {
+          throw new Error();
+        }
+        const createdEmployee = new Employee({
+          first_name: first_name,
+          last_name: last_name,
+          email: email,
+          gender: gender,
+          designation: designation,
+          salary: salary,
+          date_of_joining: new Date(date_of_joining).toISOString(),
+          department: department,
+          employee_photo: employee_photo,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
 
-      const res = await createdEmployee.save();
+        const newEmployee = await createdEmployee.save();
 
-      console.log("res._doc:");
-      console.log(res._doc);
-
-      return createdEmployee;
+        return newEmployee;
+      } catch (err) {
+        console.log("ERROR: Invalid input.");
+      }
     },
 
     async updateEmployee(

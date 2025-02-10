@@ -1,10 +1,4 @@
 module.exports = `#graphql
-  enum Gender {
-    MALE
-    FEMALE
-    OTHER
-  }
-
   type User {
     username: String
     email: String
@@ -17,7 +11,7 @@ module.exports = `#graphql
     first_name: String
     last_name: String
     email: String
-    gender: Gender
+    gender: String
     designation: String
     salary: Float
     date_of_joining: String # Make this Date later.
