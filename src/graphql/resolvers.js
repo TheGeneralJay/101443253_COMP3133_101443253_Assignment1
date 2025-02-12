@@ -2,7 +2,6 @@ const User = require("../models/User");
 const Employee = require("../models/Employee");
 const { isValidGender } = require("../utils/isValidGender");
 const { GraphQLError } = require("graphql");
-const db = require("../database/db");
 
 module.exports = {
   Query: {
@@ -23,7 +22,15 @@ module.exports = {
       }
 
       // If the password does not match, throw error.
-      if (password != user.password) {
+      try {
+        const isMatch = await user.comparePassword(password);
+
+        if (isMatch) {
+          return user;
+        } else {
+          throw new Error();
+        }
+      } catch (err) {
         throw new GraphQLError("ERROR: Password is incorrect.", {
           extensions: {
             code: "BAD_USER_INPUT",
@@ -31,8 +38,6 @@ module.exports = {
           },
         });
       }
-
-      return user;
     },
 
     async getEmployees(_) {
@@ -110,9 +115,9 @@ module.exports = {
         updated_at: new Date().toISOString(),
       });
 
-      const res = await createdUser.save();
+      await createdUser.save();
 
-      return res;
+      return createdUser;
     },
 
     async createEmployee(
