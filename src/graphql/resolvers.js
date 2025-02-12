@@ -2,6 +2,7 @@ const User = require("../models/User");
 const Employee = require("../models/Employee");
 const { isValidGender } = require("../utils/isValidGender");
 const { GraphQLError } = require("graphql");
+const db = require("../database/db");
 
 module.exports = {
   Query: {
@@ -39,9 +40,36 @@ module.exports = {
     },
 
     async getEmployeeById(_, id) {
-      const employee = await Employee.findById(id.ID);
+      try {
+        const employee = await Employee.findById(id.ID);
 
-      return employee;
+        // If employee does not exist, throw an error.
+        if (employee == null) {
+          throw new GraphQLError(
+            `ERROR: Employee with ID ${id.ID} does not exist.`,
+            {
+              extensions: {
+                code: "BAD_USER_INPUT",
+                argumentName: "ID",
+              },
+            }
+          );
+        }
+
+        return employee;
+      } catch (err) {
+        // If we get here, the objectID is invalid.
+        // This stops Mongo from throwing it's own error.
+        throw new GraphQLError(
+          `ERROR: Employee with ID ${id.ID} does not exist.`,
+          {
+            extensions: {
+              code: "BAD_USER_INPUT",
+              argumentName: "ID",
+            },
+          }
+        );
+      }
     },
 
     async getEmployeeByDesc(_, searchWord) {
@@ -59,6 +87,21 @@ module.exports = {
   },
   Mutation: {
     async signup(_, { userInput: { username, email, password } }) {
+      // Ensure given email does not belong to another account.
+      const checkDuplicates = await User.findOne({ email: email });
+
+      if (checkDuplicates !== null) {
+        throw new GraphQLError(
+          `ERROR: Account with email ${email} already exists.`,
+          {
+            extensions: {
+              code: "BAD_USER_INPUT",
+              argumentName: "email",
+            },
+          }
+        );
+      }
+
       const createdUser = new User({
         username: username,
         email: email,
@@ -89,30 +132,50 @@ module.exports = {
       }
     ) {
       // If the gender option is not one of the pre-defined values, do not continue.
-      try {
-        if (!isValidGender(gender)) {
-          throw new Error();
-        }
-        const createdEmployee = new Employee({
-          first_name: first_name,
-          last_name: last_name,
-          email: email,
-          gender: gender,
-          designation: designation,
-          salary: salary,
-          date_of_joining: new Date(date_of_joining).toISOString(),
-          department: department,
-          employee_photo: employee_photo,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
-
-        const newEmployee = await createdEmployee.save();
-
-        return newEmployee;
-      } catch (err) {
-        console.log("ERROR: Invalid input.");
+      if (!isValidGender(gender)) {
+        throw new GraphQLError(
+          `ERROR: Gender input invalid, please choose ["MALE", "FEMALE", or "OTHER"]`,
+          {
+            extensions: {
+              code: "BAD_USER_INPUT",
+              argumentName: "gender",
+            },
+          }
+        );
       }
+
+      // If email is not unique, throw error.
+      const checkDuplicates = await Employee.findOne({ email: email });
+
+      if (checkDuplicates !== null) {
+        throw new GraphQLError(
+          `ERROR: Employee with email ${email} already exists.`,
+          {
+            extensions: {
+              code: "BAD_USER_INPUT",
+              argumentName: "email",
+            },
+          }
+        );
+      }
+
+      const createdEmployee = new Employee({
+        first_name: first_name,
+        last_name: last_name,
+        email: email,
+        gender: gender,
+        designation: designation,
+        salary: salary,
+        date_of_joining: new Date(date_of_joining).toISOString(),
+        department: department,
+        employee_photo: employee_photo,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+
+      const newEmployee = await createdEmployee.save();
+
+      return newEmployee;
     },
 
     async updateEmployee(
@@ -131,6 +194,21 @@ module.exports = {
         },
       }
     ) {
+      // Ensure email isn't being changed to one already in use.
+      const checkDuplicates = await Employee.findOne({ email: email });
+
+      if (checkDuplicates !== null) {
+        throw new GraphQLError(
+          `ERROR: Employee with email ${email} already exists.`,
+          {
+            extensions: {
+              code: "BAD_USER_INPUT",
+              argumentName: "email",
+            },
+          }
+        );
+      }
+
       const edited = (
         await Employee.updateOne(
           { _id: ID },
@@ -143,6 +221,7 @@ module.exports = {
             salary: salary,
             department: department,
             employee_photo: employee_photo,
+            updated_at: new Date().toISOString(),
           }
         )
       ).modifiedCount;
@@ -153,10 +232,26 @@ module.exports = {
     },
 
     async deleteEmployee(_, { ID }) {
-      const deleted = (await Employee.deleteOne({ _id: ID })).deletedCount;
+      try {
+        const deleted = (await Employee.deleteOne({ _id: ID })).deletedCount;
 
-      if (deleted) {
-        return `Employee #${ID} was deleted successfully.`;
+        if (deleted) {
+          return `Employee #${ID} was deleted successfully.`;
+        } else {
+          // This means we likely already deleted the user, as the ID is valid but no longer belongs to anyone.
+          // Throw error to reach the catch block and avoid issues.
+          throw new Error();
+        }
+      } catch (err) {
+        throw new GraphQLError(
+          `ERROR: Employee with ID ${ID} does not exist.`,
+          {
+            extensions: {
+              code: "BAD_USER_INPUT",
+              argumentName: "ID",
+            },
+          }
+        );
       }
     },
   },
