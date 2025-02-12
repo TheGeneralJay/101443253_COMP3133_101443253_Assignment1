@@ -1,9 +1,17 @@
 const User = require("../models/User");
 const Employee = require("../models/Employee");
 const { isValidGender } = require("../utils/isValidGender");
-const { GraphQLError } = require("graphql");
+const { GraphQLError, GraphQLScalarType } = require("graphql");
 
 module.exports = {
+  Date: new GraphQLScalarType({
+    name: "Date",
+    description: "Custom date scalar type.",
+    parseValue() {
+      return new Date().toLocaleDateString();
+    },
+  }),
+
   Query: {
     async login(_, { username, password }) {
       const user = await User.findOne({ username: username });
@@ -171,11 +179,11 @@ module.exports = {
         gender: gender,
         designation: designation,
         salary: salary,
-        date_of_joining: new Date(date_of_joining).toISOString(),
+        date_of_joining: new Date(date_of_joining).toLocaleDateString(),
         department: department,
         employee_photo: employee_photo,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_at: new Date().toLocaleDateString(),
+        updated_at: new Date().toLocaleDateString(),
       });
 
       const newEmployee = await createdEmployee.save();
@@ -226,7 +234,7 @@ module.exports = {
             salary: salary,
             department: department,
             employee_photo: employee_photo,
-            updated_at: new Date().toISOString(),
+            updated_at: new Date().toLocaleDateString(),
           }
         )
       ).modifiedCount;

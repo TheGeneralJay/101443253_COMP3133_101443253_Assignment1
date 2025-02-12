@@ -1,10 +1,12 @@
 module.exports = `#graphql
+  scalar Date
+
   type User {
     username: String
     email: String
     password: String
-    created_at: String # Make this Date later.
-    updated_at: String # Make this Date later.
+    created_at: Date
+    updated_at: Date
   }
 
   type Employee {
@@ -14,11 +16,11 @@ module.exports = `#graphql
     gender: String
     designation: String
     salary: Float
-    date_of_joining: String # Make this Date later.
+    date_of_joining: Date
     department: String
     employee_photo: String
-    created_at: String # Make this Date later.
-    updated_at: String # Make this Date later.
+    created_at: Date
+    updated_at: Date
   }
 
   input UserInput {
