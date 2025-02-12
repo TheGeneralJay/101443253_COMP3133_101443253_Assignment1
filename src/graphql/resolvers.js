@@ -1,16 +1,34 @@
 const User = require("../models/User");
 const Employee = require("../models/Employee");
 const { isValidGender } = require("../utils/isValidGender");
-const mongoose = require("mongoose");
+const { GraphQLError } = require("graphql");
 
 module.exports = {
   Query: {
     async login(_, { username, password }) {
       const user = await User.findOne({ username: username });
 
+      // If user does not exist, throw error.
+      if (user == null) {
+        throw new GraphQLError(
+          `ERROR: Account with username ${username} does not exist.`,
+          {
+            extensions: {
+              code: "BAD_USER_INPUT",
+              argumentName: "username",
+            },
+          }
+        );
+      }
+
       // If the password does not match, throw error.
       if (password != user.password) {
-        throw new Error();
+        throw new GraphQLError("ERROR: Password is incorrect.", {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            argumentName: "password",
+          },
+        });
       }
 
       return user;

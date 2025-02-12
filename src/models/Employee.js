@@ -1,4 +1,3 @@
-const graphql = require("graphql");
 const mongoose = require("mongoose");
 
 const EmployeeSchema = new mongoose.Schema({
