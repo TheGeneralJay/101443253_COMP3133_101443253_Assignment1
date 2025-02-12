@@ -7,7 +7,7 @@ const { expressMiddleware } = require("@apollo/server/express4");
 const PORT = 4000;
 
 // DB Connection.
-db.mongoose.connect(db.URI);
+db.connectToDB();
 
 const typeDefs = require("./graphql/typeDefs");
 const resolvers = require("./graphql/resolvers");
@@ -27,5 +27,7 @@ app.listen(PORT, async () => {
   app.use("/graphql", expressMiddleware(server));
   app.use("*", cors());
 
-  console.log(`http://localhost:${PORT}`);
+  console.log(`-------------------------------------------`);
+  console.log(`App listening at http://localhost:${PORT}`);
+  console.log(`-------------------------------------------`);
 });
