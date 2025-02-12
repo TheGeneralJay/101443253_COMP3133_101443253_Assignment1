@@ -36,7 +36,7 @@ module.exports = `#graphql
     gender: String
     designation: String
     salary: Float
-    date_of_joining: String
+    date_of_joining: Date
     department: String
     employee_photo: String
   }
