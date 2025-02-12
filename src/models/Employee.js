@@ -6,7 +6,7 @@ const EmployeeSchema = new mongoose.Schema({
   email: String,
   gender: String,
   designation: { type: String, required: true },
-  salary: { type: String, required: true }, // Make work with graphql float later.
+  salary: { type: Number, required: true, min: 1000 },
   date_of_joining: { type: Date, required: true },
   department: { type: String, required: true },
   employee_photo: String,
