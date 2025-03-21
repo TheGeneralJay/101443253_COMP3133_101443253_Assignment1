@@ -22,10 +22,27 @@ const app = express();
 app.use(express.json());
 app.use(bodyParser.json());
 
+const corsOrigin = {
+  origin: "http://localhost:4200",
+  credentials: true,
+  optionSuccessStatus: 200,
+};
+
+// app.use((req, res, next) => {
+//   const origin = "http://localhost:4200";
+//   res.header("Access-Control-Allow-Origin", origin);
+//   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+//   );
+//   next();
+// });
+
 app.listen(PORT, async () => {
   await server.start();
-  app.use("/graphql", expressMiddleware(server));
-  app.use("*", cors());
+  app.use("/graphql", cors(corsOrigin), expressMiddleware(server));
+  //app.use(cors());
 
   console.log(`-------------------------------------------`);
   console.log(`App listening at http://localhost:${PORT}`);
