@@ -20,36 +20,35 @@ const server = new ApolloServer({
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 app.use(bodyParser.json());
 
-const corsOrigin = {
-  origin: "http://localhost:4200",
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "Access-Control-Allow-Methods",
-    "Access-Control-Request-Headers",
-  ],
-  credentials: true,
-  enablePreflight: true,
-  optionSuccessStatus: 200,
-};
+// const corsOrigin = {
+//   origin: "http://localhost:4200",
+//   allowedHeaders: [
+//     "Content-Type",
+//     "Authorization",
+//     "Access-Control-Allow-Methods",
+//     "Access-Control-Request-Headers",
+//   ],
+//   credentials: true,
+//   enablePreflight: true,
+//   optionSuccessStatus: 200,
+// };
 
-app.use((req, res, next) => {
-  const origin = "http://localhost:4200";
-  res.header("Access-Control-Allow-Origin", origin);
-  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  next();
-});
+// app.use((req, res, next) => {
+//   const origin = "http://localhost:4200";
+//   res.header("Access-Control-Allow-Origin", origin);
+//   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+//   );
+//   next();
+// });
 
 app.listen(PORT, async () => {
   await server.start();
-  app.use(cors(corsOptions));
-  app.options("*", cors(corsOptions));
   app.use("/graphql", expressMiddleware(server));
 
   console.log(`-------------------------------------------`);
