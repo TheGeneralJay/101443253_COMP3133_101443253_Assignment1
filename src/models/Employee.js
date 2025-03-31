@@ -4,7 +4,7 @@ const EmployeeSchema = new mongoose.Schema({
   first_name: { type: String, required: true },
   last_name: { type: String, required: true },
   email: String,
-  gender: String,
+  gender: { type: String, uppercase: true },
   designation: { type: String, required: true },
   salary: { type: Number, required: true, min: 1000 },
   date_of_joining: { type: Date, required: true },
